@@ -23,10 +23,11 @@ const app = express();
 // ============================
 // 🔧 CORS (Top, before body parsers)
 app.use(cors({
-    origin: [
-        "http://localhost:3000",
-        "https://saas-project-salon-management-syste-seven.vercel.app"
-    ],
+    // origin: [
+    //     "http://localhost:3000",
+    //     "https://saas-project-salon-management-syste-seven.vercel.app"
+    // ],
+      origin: "*",
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true
