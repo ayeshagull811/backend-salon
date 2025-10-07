@@ -17,33 +17,34 @@ const RegisterUser = async (req, res) => {
       email,
       password_hash,
       phonenumber,
-      confirmpassword,
-      salon_email,
-      contact_number,
-      type,
-      adminId // 👈 dropdown se select kiya admin id
+      confirmpassword
     } = req.body;
 
-    if (!firstname || !lastname || !email || !password_hash ) {
+    // ✅ Required fields check
+    if (!firstname || !lastname || !email || !password_hash) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
+    // ✅ Password match check
     if (password_hash !== confirmpassword) {
       return res.status(400).json({ message: "Passwords do not match" });
     }
 
+    // ✅ Check if user already exists
     const existingUser = await User.findOne({ where: { email } });
     if (existingUser) {
       return res.status(400).json({ message: "Email already exists" });
     }
 
+    // ✅ Hash password
     const hashedPassword = await bcrypt.hash(password_hash, 10);
 
-    // ✅ Owner role
+    // ✅ Find owner role
     const ownerRole = await Role.findOne({ where: { name: "owner" } });
-    if (!ownerRole) return res.status(500).json({ message: "Owner role not found" });
+    if (!ownerRole)
+      return res.status(500).json({ message: "Owner role not found" });
 
-    // ✅ Create owner user
+    // ✅ Create only owner (no salon)
     const newUser = await User.create({
       firstname,
       lastname,
@@ -53,44 +54,16 @@ const RegisterUser = async (req, res) => {
       roleId: ownerRole.id
     });
 
-    // ✅ Create salon and assign selected admin
-    const newSalon = await Salon.create({
-      salon_name,
-      salon_email,
-      contact_number,
-      type,
-      ownerId: newUser.id
-    });
-
-    // ✅ Map owner to salon
-    await UserSalons.create({
-      userId: newUser.id,
-      salonId: newSalon.id,
-      roleId: ownerRole.id
-    });
-
-    // ✅ Map admin to salon if selected
-    if (adminId) {
-      const adminRole = await Role.findOne({ where: { name: "admin" } });
-      if (adminRole) {
-        await UserSalons.create({
-          userId: adminId,
-          salonId: newSalon.id,
-          roleId: adminRole.id
-        });
-      }
-    }
-
     res.status(201).json({
-      message: "Owner and salon created successfully",
-      owner: newUser,
-      salon: newSalon
+      message: "Owner created successfully",
+      owner: newUser
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "server err", error: error.message });
+    res.status(500).json({ message: "Server error", error: error.message });
   }
 };
+
 
 // ✅ Staff/Admin Register
 const RegisterStaff = async (req, res) => {
