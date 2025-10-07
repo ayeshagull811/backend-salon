@@ -59,7 +59,8 @@ const RegisterUser = async (req, res) => {
       owner: newUser
     });
   } catch (error) {
-    console.error(error);
+    // <-- Replace your existing catch block with this
+    console.error("Signup error:", error); // logs full error in backend console
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };
