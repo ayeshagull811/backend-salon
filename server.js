@@ -55,6 +55,8 @@ app.use('/inventory', inventoryRouter);
 // Server + DB check
 const PORT = process.env.PORT || 8000;
 
+// test
+
 app.listen(PORT, async () => {
     console.log(`✅ Server running on port ${PORT}`);
 
