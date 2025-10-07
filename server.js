@@ -53,7 +53,7 @@ app.use('/inventory', inventoryRouter);
 
 // ============================
 // Server + DB check
-const PORT = process.env.PORT || 8000;
+const PORT = process.env.DB_PORT || 8000;
 
 // test
 
