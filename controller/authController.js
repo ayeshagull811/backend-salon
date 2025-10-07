@@ -18,14 +18,13 @@ const RegisterUser = async (req, res) => {
       password_hash,
       phonenumber,
       confirmpassword,
-      salon_name,
       salon_email,
       contact_number,
       type,
       adminId // 👈 dropdown se select kiya admin id
     } = req.body;
 
-    if (!firstname || !lastname || !email || !password_hash || !salon_name) {
+    if (!firstname || !lastname || !email || !password_hash ) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
