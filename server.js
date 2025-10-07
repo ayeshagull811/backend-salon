@@ -23,13 +23,14 @@ const app = express();
 // ============================
 // 🔧 CORS (Top, before body parsers)
 app.use(cors({
-    origin: ["http://localhost:3000", "https://saas-project-salon-management-syste-seven.vercel.app"],
+    origin: [
+        "http://localhost:3000",
+        "https://saas-project-salon-management-syste-seven.vercel.app"
+    ],
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true
 }));
-
-// app.options('/*', cors());
 
 // ============================
 // Parsers
@@ -53,33 +54,14 @@ app.use('/inventory', inventoryRouter);
 
 // ============================
 // Server + DB check
-const PORT = process.env.DB_PORT || 8000;
-
-// test
+const PORT = process.env.PORT || 8000;
 
 app.listen(PORT, async () => {
     console.log(`✅ Server running on port ${PORT}`);
 
     try {
-        const { Sequelize } = require('sequelize');
-        const sslSequelize = new Sequelize(
-            process.env.DB_NAME,
-            process.env.DB_USERNAME,
-            process.env.DB_PASSWORD,
-            {
-                host: process.env.DB_HOST,
-                port: process.env.DB_PORT,
-                dialect: process.env.DB_DIALECT,
-                dialectOptions: {
-                    ssl: {
-                        require: true,
-                        rejectUnauthorized: false,
-                    },
-                },
-            }
-        );
-
-        await sslSequelize.authenticate();
+        // Use the existing Sequelize instance from ./models
+        await sequelize.authenticate();
         console.log("✅ Database connected successfully (via SSL)");
     } catch (err) {
         console.error("❌ DB connection error:", err);
