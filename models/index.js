@@ -1,14 +1,12 @@
 require('dotenv').config();
 const fs = require('fs');
 const path = require('path');
-const Sequelize = require('sequelize');
+const { Sequelize, DataTypes } = require('sequelize');
 
 const basename = path.basename(__filename);
-const env = process.env.NODE_ENV || 'development';
-
 const db = {};
 
-// ✅ Updated Sequelize instance for Railway
+// ✅ Railway MySQL connection with SSL enabled
 const sequelize = new Sequelize(
   process.env.DB_NAME,
   process.env.DB_USERNAME,
@@ -17,36 +15,34 @@ const sequelize = new Sequelize(
     host: process.env.DB_HOST,
     port: process.env.DB_PORT || 3306,
     dialect: process.env.DB_DIALECT || 'mysql',
-    logging: false, // set to console.log to debug SQL queries
+    logging: false,
     dialectOptions: {
+      connectTimeout: 60000, // prevent ETIMEDOUT error
       ssl: {
         require: true,
-        rejectUnauthorized: false,
+        rejectUnauthorized: false, // Railway uses self-signed certs
       },
     },
   }
 );
 
-// Dynamically import all models in the same folder
+// ✅ Dynamically import all models in current folder
 fs.readdirSync(__dirname)
-  .filter((file) => {
-    return (
+  .filter(
+    (file) =>
       file.indexOf('.') !== 0 &&
       file !== basename &&
       file.slice(-3) === '.js' &&
-      file.indexOf('.test.js') === -1
-    );
-  })
+      !file.endsWith('.test.js')
+  )
   .forEach((file) => {
-    const model = require(path.join(__dirname, file))(sequelize, Sequelize.DataTypes);
+    const model = require(path.join(__dirname, file))(sequelize, DataTypes);
     db[model.name] = model;
   });
 
-// Run associations if any
+// ✅ Set up model associations (if any)
 Object.keys(db).forEach((modelName) => {
-  if (db[modelName].associate) {
-    db[modelName].associate(db);
-  }
+  if (db[modelName].associate) db[modelName].associate(db);
 });
 
 db.sequelize = sequelize;
