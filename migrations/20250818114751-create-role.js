@@ -11,8 +11,7 @@ module.exports = {
       },
       name: {
         type: Sequelize.STRING,
-        allowNull: false,   // ✅ null nahi hoga
-        // ❌ yahan unique hatao
+        allowNull: false
       },
       salonId: {
         type: Sequelize.INTEGER,
@@ -24,6 +23,13 @@ module.exports = {
         onUpdate: "CASCADE",
         onDelete: "CASCADE",
       },
+
+      // ✅ Add this
+      defaultPermissions: {
+        type: Sequelize.JSON,
+        allowNull: true, // owner ke liye default permissions yahan save karoge
+      },
+
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE
@@ -34,7 +40,7 @@ module.exports = {
       }
     });
 
-    // 👇 Composite unique constraint add karo
+    // ✅ Unique constraint for (name, salonId)
     await queryInterface.addConstraint("Roles", {
       fields: ["name", "salonId"],
       type: "unique",
