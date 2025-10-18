@@ -21,20 +21,30 @@ const inventoryRouter = require('./routes/inventoryRoute');
 const app = express();
 
 // ============================
-// 🔧 CORS (Top, before body parsers)
-app.use(cors({
-    // origin: [
-    //     "http://localhost:3000",
-    //     "https://saas-project-salon-management-syste-seven.vercel.app"
-    // ],
-      origin: "*",
+// 🔧 CORS Setup (Very Important)
+const allowedOrigins = [
+  "https://saas-project-salon-management-syste-seven.vercel.app", // your frontend (Vercel)
+  "http://localhost:3000" // for local dev
+];
+
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        console.log("❌ Blocked by CORS:", origin);
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
-    credentials: true
-}));
+  })
+);
 
 // ============================
-// Parsers
+// Parsers & Static Files
 app.use(cookieParser());
 app.use(bodyParser.json());
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
@@ -54,17 +64,16 @@ app.use('/appointment', appointmentRouter);
 app.use('/inventory', inventoryRouter);
 
 // ============================
-// Server + DB check
+// Server + DB Connection
 const PORT = process.env.PORT || 8000;
 
 app.listen(PORT, async () => {
-    console.log(`✅ Server running on port ${PORT}`);
+  console.log(`✅ Server running on port ${PORT}`);
 
-    try {
-        // Use the existing Sequelize instance from ./models
-        await sequelize.authenticate();
-        console.log("✅ Database connected successfully (via SSL)");
-    } catch (err) {
-        console.error("❌ DB connection error:", err);
-    }
+  try {
+    await sequelize.authenticate();
+    console.log("✅ Database connected successfully (via SSL)");
+  } catch (err) {
+    console.error("❌ DB connection error:", err);
+  }
 });
